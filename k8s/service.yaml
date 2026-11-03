@@ -1,0 +1,11 @@
+# Adresse stable qui répartit le trafic entre les pods de Nova.
+apiVersion: v1
+kind: Service
+metadata:
+  name: nova
+spec:
+  selector:
+    app: nova
+  ports:
+    - port: 80
+      targetPort: 8000
