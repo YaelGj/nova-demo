@@ -1,0 +1,3 @@
+# group_vars/recette.yml
+environnement: RECETTE
+maintenance: false
