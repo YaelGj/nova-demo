@@ -1,0 +1,15 @@
+{# Modèle de la page : même fichier pour tous les environnements, valeurs lues dans group_vars. #}
+{% set couleur = 'green' if environnement == 'PRODUCTION' else 'darkorange' %}
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Nova — {{ environnement }}</title></head>
+<body style="margin: 0; font-family: sans-serif;">
+<div style="background: {{ couleur }}; color: white; padding: 1em; font-size: 2em;">{{ environnement }}</div>
+<h1>Pizzeria Nova</h1>
+<p>Machine : {{ inventory_hostname }}</p>
+{% if maintenance %}
+<p><strong>Maintenance en cours</strong></p>
+{% endif %}
+<p>Cas fictif, exercice pédagogique.</p>
+</body>
+</html>

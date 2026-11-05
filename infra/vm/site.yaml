@@ -1,12 +1,7 @@
-- hosts: web   # groupe de l'inventaire
+# site.yaml
+- hosts: all
   tasks:
-    - name: Installer nginx
-      ansible.builtin.apt:
-        name: nginx
-        state: present
-        update_cache: true
-        cache_valid_time: 3600
-    - name: Déposer la page d'accueil
-      ansible.builtin.copy:
-        src: index.html
-        dest: /var/www/html/index.html
+    - name: Configurer la vitrine
+      ansible.builtin.template:
+        src: vitrine.html.j2
+        dest: /srv/index.html
