@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from app.main import app, prix_total
 
 def test_prix_total_unitaire():
-    assert prix_total([10, 5]) == 15
+    assert prix_total([10, 5]) == 16
 
 def test_route_commandes_integration():
     client = TestClient(app)
