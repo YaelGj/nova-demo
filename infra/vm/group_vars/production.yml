@@ -1,0 +1,3 @@
+# group_vars/production.yml
+environnement: PRODUCTION
+maintenance: false

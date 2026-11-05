@@ -1,8 +1,13 @@
-web:
-  hosts:
-    vm-web-1:
-    vm-web-2:
+# Inventaire Ansible : les « VM » sont des conteneurs, joints par Docker (sans SSH).
+all:
   vars:
     ansible_connection: community.docker.docker
     # Image python:3.12-slim : Python est dans /usr/local/bin.
     ansible_python_interpreter: /usr/local/bin/python3
+  children:
+    recette:
+      hosts:
+        vm-web-1:
+    production:
+      hosts:
+        vm-web-2:
