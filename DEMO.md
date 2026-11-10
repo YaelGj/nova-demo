@@ -153,7 +153,7 @@ Remettre `main` dans l'état « avant » (sans réécrire l'historique) et désa
 gh api -X PUT repos/YaelGj/nova-demo/rulesets/$(gh api repos/YaelGj/nova-demo/rulesets --jq '.[0].id') -f enforcement=disabled
 gh pr close test-casse --delete-branch
 git switch main && git pull
-git restore --source=$(git log --format=%H -1 --grep="^Démonstrations Nova") --staged --worktree .
+git restore --source="$(git log --format=%H -1 --grep="^Pipeline : ci.yml")^" --staged --worktree .
 git commit -m "Retour à l'état avant" && git push
 gh release delete v1.0.0 --cleanup-tag --yes
 ```
