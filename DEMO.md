@@ -10,6 +10,8 @@ Ruleset `proteger-main` : créé, **désactivé**. Toutes les commandes se lance
 1. Codespace créé sur `main`, puis `docker compose pull` (images Prometheus et Grafana en cache).
 2. Ruleset désactivé : `gh api repos/YaelGj/nova-demo/rulesets --jq '.[].enforcement'` affiche `disabled`.
 3. Pas de tag ni de release : `gh release list` est vide.
+4. Branches distantes : `main` et `solution` seulement (`git ls-remote --heads origin`). Une fois, avant la première séance :
+   `gh pr close 2` puis `git push origin --delete ajout-ci test-casse` (restes de la version précédente).
 
 ## TP 0 (3 min) : le codespace
 
