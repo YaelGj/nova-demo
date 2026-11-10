@@ -1,127 +1,157 @@
-# Déroulé des démonstrations
+# Démonstrations du formateur (nova-demo)
 
-> Cas fictif, exercice pédagogique.
+> Cas fictif, exercice pédagogique. Mêmes fichiers, commandes et ports que kelvia-api.
 
-Tout se lance dans le codespace du dépôt (dev container : Python 3.12, Docker, Terraform 1.17.1, ansible-core 2.21.6
-et la collection community.docker 5.4.0, installés par `.devcontainer/post-create.sh`).
-
-## Les branches
-
-| Branche | Contenu | Sert à |
-|---|---|---|
-| `main` | Tout, sauf `.github/workflows/ci.yml` | Point de départ |
-| `ajout-ci` | `main` + `ci.yml` | Démonstration « un cycle complet » : première pull request |
-| `test-casse` | `ajout-ci` + un test cassé | Pull request laissée au rouge pour montrer la fusion bloquée par le ruleset |
-
-Les deux branches reçoivent les mises à jour de `main` par fusion (`git merge main`), jamais par rebase :
-leur historique déjà poussé ne change pas.
-
-`livraison.yml` est déjà sur `main` : il ne réagit qu'aux tags `v*`, il ne gêne donc pas les pull requests,
-et il est présent sur le commit qui recevra le tag `v1.0.0`.
+`main` = état « avant » ; `solution` = état final, avec en plus `.github/workflows/livraison.yml` et `CHANGELOG.md` (livraison sur tag).
+Ruleset `proteger-main` : créé, **désactivé**. Toutes les commandes se lancent dans un codespace de `main`, à la racine du dépôt.
 
 ## La veille
 
-1. Pousser `main`, `ajout-ci` et `test-casse`. Ne pas poser de tag.
-2. Ouvrir la pull request `test-casse` → `main` : `ci.yml` est sur la branche, le job `tests` démarre et passe au rouge.
-   Ne jamais la fusionner.
-3. Préparer le ruleset désactivé : à la main dans Settings → Rules → Rulesets, ou avec `ruleset.json` :
-   `gh api --method POST repos/<compte>/nova-demo/rulesets --input ruleset.json`.
-   Le check `tests` n'est proposé dans l'interface qu'après une première exécution du job (étape 2).
-4. Créer le codespace et lancer une fois `terraform init` dans `infra/vm` et `infra/cloud`.
+1. Codespace créé sur `main`, puis `docker compose pull` (images Prometheus et Grafana en cache).
+2. Ruleset désactivé : `gh api repos/YaelGj/nova-demo/rulesets --jq '.[].enforcement'` affiche `disabled`.
+3. Pas de tag ni de release : `gh release list` est vide.
 
-## Chapitre 2 — Décaler les contrôles à gauche (pip-audit)
+## TP 0 (3 min) : le codespace
 
-`pip-audit` est dans `requirements.txt` : il est déjà installé dans le codespace.
+Montrer `.devcontainer/devcontainer.json` (image, outils, `post-create.sh`, ports), puis :
 
 ```bash
-pip-audit -r requirements.txt
-echo $?        # 0 : aucune faille connue ; 1 : au moins une faille, à lire avec la classe
+uvicorn app.main:app --reload
 ```
 
-Au 5/11/2026 : `No known vulnerabilities found`, code de sortie 0 (environ 7 s).
+Onglet **Ports** → 8000 → **Open in Browser** (visibilité **Private**) : la page de la pizzeria. Changer `PIZZERIA` dans `app/main.py`, recharger. Ctrl+C.
 
-## Démonstration « un cycle complet »
-
-1. Pull request `ajout-ci` → `main` : vert, puis fusion **par un commit de fusion** (« Create a merge commit »).
-   Avec « Squash and merge », la pull request `test-casse` montrerait de nouveau `ci.yml` dans ses fichiers modifiés.
-2. En direct : `git switch main && git pull`, `git switch -c casse-en-direct`, casser l'assertion de
-   `test_prix_total_unitaire`, pousser, ouvrir la pull request : rouge.
-3. Lire le journal du job `tests`, corriger, pousser : vert. Commenter une ligne, fusionner.
-4. `git switch main && git pull`, puis `git tag v1.0.0` et `git push origin v1.0.0` :
-   le workflow `livraison` crée la release avec `CHANGELOG.md`.
-
-## Ruleset (slide « Protéger main avec un ruleset »)
-
-Activer le ruleset (Enforcement status : Active), puis ouvrir la pull request `test-casse` : la fusion est bloquée.
-
-## Chapitre 4 — Terraform et Ansible (démonstration de 3 à 4 minutes)
-
-Dossier `infra/vm` : une image « VM » (`vm/Dockerfile`, Python qui sert `/srv` sur le port 8000),
-le réseau `nova` et deux « VM » publiées sur les ports 8081 et 8082.
-
-Avant la séance (pas pendant les 4 minutes) :
+## Chapitre 2 : pip-audit
 
 ```bash
-cd infra/vm
+pip install pip-audit==2.10.1
+pip-audit -r requirements.txt; echo $?     # 0 : aucune faille connue
+```
+
+## TP 1 (2 min) : RENDU.md
+
+Ouvrir `RENDU.md`, remplir en direct : `12 déploiements sur 1 mois | 12 par mois`, puis la friction de Karim : `délai`.
+Ne pas commiter (Ctrl+Z, ou `git checkout RENDU.md`).
+
+## Chapitre 3 : un cycle complet (25 min)
+
+1. Branche `ajout-ci`, pull request : pastille verte, fusion.
+   ```bash
+   git switch -c ajout-ci
+   git checkout origin/solution -- .github CHANGELOG.md
+   git commit -m "Pipeline : ci.yml et livraison.yml"
+   git push -u origin ajout-ci
+   gh pr create --fill
+   gh pr checks --watch
+   gh pr merge --merge
+   ```
+2. Badge d'état : sur `main`, coller sous le titre du README
+   `![ci](https://github.com/YaelGj/nova-demo/actions/workflows/ci.yml/badge.svg)`, puis :
+   ```bash
+   git switch main && git pull
+   git commit -am "Badge d'état" && git push
+   ```
+   Page du dépôt : badge vert après le pipeline de `main` (environ 30 s).
+3. Un test cassé : `"prix": 9` devient `"prix": 10` dans `app/main.py`.
+   ```bash
+   git switch -c casse-en-direct
+   git commit -am "Margherita à 10 €" && git push -u origin casse-en-direct
+   gh pr create --fill
+   gh pr checks --watch                    # tests : fail
+   gh run view --log-failed | grep -E "assert|FAILED"
+   ```
+   Lire `assert 10 == 9`, remettre `9`, puis `git commit -am "Prix remis" && git push`, `gh pr checks --watch` (pass), `gh pr merge --merge`.
+4. Tag v1.0.0 : la release apparaît.
+   ```bash
+   git switch main && git pull
+   git tag v1.0.0 && git push origin v1.0.0
+   gh run watch $(gh run list -w livraison -L 1 --json databaseId -q '.[0].databaseId')
+   gh release view v1.0.0
+   ```
+
+Pendant la pause qui suit : préparer la pull request rouge du ruleset (elle fait aussi apparaître le check `tests` dans le ruleset).
+
+```bash
+git switch main && git pull && git switch -c test-casse
+sed -i 's/"prix": 9/"prix": 10/' app/main.py
+git commit -am "Test cassé (démonstration du ruleset, ne pas fusionner)" && git push -u origin test-casse
+gh pr create --fill
+```
+
+## Ruleset (avant le TP 2)
+
+**Settings → Rules → Rulesets → proteger-main → Enforcement status : Active → Save** (ou `gh api -X PUT repos/YaelGj/nova-demo/rulesets/$(gh api repos/YaelGj/nova-demo/rulesets --jq '.[0].id') -f enforcement=active`).
+Ouvrir la pull request `test-casse` : **Merge** est bloqué (`gh pr merge test-casse --merge` est refusé).
+
+## TP 3 (4 min) : Terraform et Ansible
+
+```bash
+cd infra
 terraform init
-terraform apply        # yes : image nova-vm, réseau nova, vm-web-1 (8081), vm-web-2 (8082)
-curl -s localhost:8081 # « Nova — machine en attente de configuration »
+terraform apply                                   # Plan: 4 to add ; yes
+ansible-playbook -i inventaire.yaml site.yaml     # changed=1 sur vm-web-1 et vm-web-2
 ```
 
-En direct :
+Ports 8081 (RECETTE) et 8082 (PRODUCTION). Puis `maintenance: true` pour `production` dans `inventaire.yaml`, relancer le playbook :
+8082 affiche « Maintenance en cours ». Remettre `false`, relancer deux fois `terraform apply` et le playbook : « No changes. », `changed=0`.
 
-1. Montrer `inventaire.yaml` (groupes `recette` et `production`), puis `group_vars/recette.yml` et
-   `group_vars/production.yml`.
-2. `ansible-playbook -i inventaire.yaml site.yaml` : `changed` sur les deux machines.
-   Ouvrir les ports 8081 (bandeau RECETTE, orange) et 8082 (bandeau PRODUCTION, vert) dans l'onglet Ports.
-3. Question à la classe, puis `maintenance: true` dans `group_vars/production.yml` et relancer :
-   `changed` sur vm-web-2 seulement ; la page 8082 affiche « Maintenance en cours ».
-4. Remettre `maintenance: false`, relancer (`changed` sur vm-web-2), puis relancer encore : `changed=0` partout.
+## TP 4 partie 1 (3 min) : conteneuriser
 
-Preuve d'idempotence : un second `terraform apply` affiche « No changes » ; un second passage du playbook,
-`changed=0` (sorties copiées dans `exemples/idempotence-nova.md` du dépôt Kelvia).
-
-Après la séance : `terraform destroy`.
-
-## Chapitre 4 — Exercice « lisez le plan Terraform » (préparé, non montré)
-
-Pour retrouver le plan de la slide à partir de `infra/vm` (dans une copie, pas dans le dépôt) :
-
-1. Configuration « avant » : `main.tf` sans le bloc `web_2`. `terraform apply`.
-2. Configuration « après » : `internal = true` dans `docker_network.nova` (force le remplacement),
-   `restart = "unless-stopped"` dans `web_1` (modifiable en place), bloc `web_2` remis.
-3. `terraform plan` : web_1 `updated in-place`, web_2 `created`, réseau nova `must be replaced`,
-   « Plan: 2 to add, 1 to change, 1 to destroy. »
-4. `terraform apply` échoue au bout de 30 s : le réseau, encore utilisé par vm-web-1, ne peut pas être détruit
-   (`Error: timeout while waiting for state to become 'removed' (last state: 'pending', timeout: 30s)`).
-   `terraform destroy` pour finir.
-
-## Chapitre 8 — Déployer comme sur un cloud
+Lire le `Dockerfile`. Décommenter le service `api` de `compose.yaml` (sélection, Ctrl+/), puis :
 
 ```bash
-cd infra/cloud
-terraform init
-terraform apply                       # image Nova construite (environ 2 min), 2 instances, répartiteur sur le port 8080
-curl -si localhost:8080/commandes     # l'en-tête X-Instance change à chaque requête
-terraform apply -var instances=3      # Plan: 2 to add, 0 to change, 1 to destroy (répartiteur remplacé)
-terraform destroy -var instances=3
+docker compose up -d
+docker compose ps        # api : (healthy) après 10 à 20 s
 ```
 
-## Kubernetes (facultatif, en cas d'avance)
+Port 8000 : « Servie par un conteneur Docker ». Changer la phrase « Commande en ligne… » dans `app/main.py`, puis `docker compose up -d --build`.
 
-Testé dans le dev container (en local, pas dans un codespace) avec kind v0.33.0 et kubectl v1.37.0
-(environ 0,8 Gio de mémoire pour le cluster).
+## Chapitre 6 : Prometheus et Grafana sous charge
+
+Décommenter les deux lignes « TP 4 » de `app/main.py`, puis :
 
 ```bash
-mkdir -p ~/bin && cd ~/bin
-curl -fsSLo kind https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-linux-amd64
-curl -fsSLo kubectl https://dl.k8s.io/release/v1.37.0/bin/linux/amd64/kubectl
-chmod +x kind kubectl && export PATH=~/bin:$PATH && cd -
-kind create cluster --name nova
-docker build -t nova:1.0 . && kind load docker-image nova:1.0 --name nova
-kubectl apply -f k8s/
-kubectl get pods                       # 3 pods
-kubectl delete pod <un des pods>       # un nouveau pod le remplace
-kubectl port-forward service/nova 8080:80    # puis, dans un autre terminal : curl localhost:8080/commandes
-kind delete cluster --name nova
+docker compose up -d --build
+./charge.sh              # environ 5 requêtes par seconde ; Ctrl+C, puis :
+./charge.sh rush         # 60 s, 20 clients : la latence monte vers 0,5 s
+```
+
+Port 3000 (Grafana, lecture sans connexion) : tableau de bord « Nova ». Partage d'écran seulement, jamais de port public.
+
+## TP 4 (4 min) : test rouge et panne
+
+1. Test à trous : `5`, `5`, `422`, puis :
+   ```bash
+   git mv tests/quantite_a_trous.py tests/test_quantite.py
+   pytest                   # 4 passed ; avec QUANTITE_MAX = 6 : 2 failed (lire le test rouge) ; remettre 4
+   ```
+2. Panne, avec `./charge.sh` dans un second terminal et le tableau de bord ouvert :
+   ```bash
+   docker compose stop api      # « API joignable » à 0 en 10 s environ ; charge.sh affiche 000
+   docker compose start api     # retour à 1 en 5 s environ
+   ```
+
+## Chapitre 8 : déployer comme sur un cloud (6 min)
+
+Dans `infra/main.tf`, `default = 2` devient `default = 3` (variable `nombre_vm`), puis :
+
+```bash
+terraform apply          # Plan: 1 to add, 0 to change, 0 to destroy ; port 8083
+```
+
+## Après la séance
+
+```bash
+cd infra && terraform destroy -auto-approve && cd .. && docker compose down
+```
+
+Remettre `main` dans l'état « avant » (sans réécrire l'historique) et désactiver le ruleset :
+
+```bash
+gh api -X PUT repos/YaelGj/nova-demo/rulesets/$(gh api repos/YaelGj/nova-demo/rulesets --jq '.[0].id') -f enforcement=disabled
+gh pr close test-casse --delete-branch
+git switch main && git pull
+git restore --source=$(git log --format=%H -1 --grep="^Démonstrations Nova") --staged --worktree .
+git commit -m "Retour à l'état avant" && git push
+gh release delete v1.0.0 --cleanup-tag --yes
 ```

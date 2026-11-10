@@ -1,7 +1,0 @@
-# site.yaml
-- hosts: all
-  tasks:
-    - name: Configurer la vitrine
-      ansible.builtin.template:
-        src: vitrine.html.j2
-        dest: /srv/index.html

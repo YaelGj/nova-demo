@@ -1,8 +1,0 @@
-.git
-.github/
-.devcontainer/
-infra/
-k8s/
-*.tfstate*
-__pycache__/
-.pytest_cache/
