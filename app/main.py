@@ -10,7 +10,7 @@ PIZZERIA = "Pizzeria Nova"
 QUANTITE_MAX = 4
 # Pizzas, en mémoire : prix en euros et stock.
 PIZZAS = {
-    "Margherita": {"prix": 9, "stock": 500},
+    "Margherita": {"prix": 10, "stock": 500},
     "Reine": {"prix": 11, "stock": 300},
     "Quatre fromages": {"prix": 12, "stock": 200},
 }
