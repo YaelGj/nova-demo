@@ -11,7 +11,7 @@ Nova vend ses pizzas en ligne. Ce dépôt sert aux démonstrations du formateur 
 - `infra/` : Terraform et Ansible (TP 3) ; `Dockerfile`, `compose.yaml`, `monitoring/`, `charge.sh` : TP 4.
 - `CHANGELOG.md` : les versions livrées (TP 2).
 
-Bloqué 5 minutes : ouvrez le bloc **Indice** ; 5 minutes de plus : le bloc **Solution**. Une erreur : [Erreurs fréquentes](#erreurs-fréquentes).
+**Bloqué ?** 5 minutes : ouvrez le bloc **Indice** de l'étape ; 10 minutes : le bloc **Solution**, puis un message privé au formateur sur Discord. Une erreur : [Erreurs fréquentes](#erreurs-fréquentes).
 
 ## Livrer : commit et push
 
@@ -479,6 +479,6 @@ Copiez le message exact avant de demander de l'aide.
 | Cible Prometheus en erreur (`no such host`), « API joignable » à 0 | Le service `api` est encore en commentaire dans `compose.yaml` (TP 4, partie 1). |
 | Panneaux de requêtes et de latence vides pendant l'arrêt de l'API | Normal : une API arrêtée n'envoie plus de mesures. Seul « API joignable » (et `charge.sh`) voit la panne. |
 | `port is already allocated` sur le port 8000 | Un conteneur ou uvicorn tourne encore : Ctrl+C, ou `docker ps` puis `docker stop`. |
-| Aucune release après `git push origin v1.0.0` | Tag poussé avant la fusion de `livraison.yml` : `git push origin :v1.0.0` et `git tag -d v1.0.0`, puis recommencer après la fusion. |
 | `timeout while waiting for state to become 'removed'` | Une ressource remplacée (`-/+` dans le plan) est encore utilisée par une autre. |
 | `env: 'bash\r': No such file or directory` ou `detected dubious ownership` | Vous travaillez hors de Codespaces : repassez sur votre codespace. |
+| Aucune release après `git push origin v1.0.0` | Le tag a été poussé avant la fusion de `livraison.yml` : `git push origin :v1.0.0` et `git tag -d v1.0.0`, puis recommencez après la fusion. |
