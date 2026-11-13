@@ -1,5 +1,7 @@
 # Nova — pizzeria en ligne
 
+![ci](https://github.com/YaelGj/nova-demo/actions/workflows/ci.yml/badge.svg)
+
 > Cas fictif, exercice pédagogique.
 
 Nova vend ses pizzas en ligne. Ce dépôt sert aux démonstrations du formateur : mêmes fichiers, mêmes commandes et mêmes ports que kelvia-api ; déroulé dans [DEMO.md](DEMO.md).
