@@ -125,7 +125,7 @@ cd infra && terraform destroy -auto-approve && cd .. && docker compose down
 Supprimer le ruleset (**Settings → Rules → Rulesets → proteger-main → Delete ruleset**), puis, avec le commit noté la veille :
 
 ```bash
-gh release delete v1.0.0 --cleanup-tag --yes && git tag -d v1.0.0
+gh release delete v1.0.0 --cleanup-tag --yes      # supprime aussi le tag, distant et local
 git switch main && git pull
 git restore --source=<commit noté la veille> --staged --worktree .
 git commit -m "Retour à l'état avant" && git push
