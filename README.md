@@ -9,7 +9,7 @@ Nova vend ses pizzas en ligne. Ce dépôt sert aux démonstrations du formateur 
 - `app/main.py` : l'API (page `/`, `/health`, `/commandes`) ; `tests/` : les tests pytest.
 - `.devcontainer/` : l'environnement du codespace, décrit en code.
 - `infra/` : Terraform et Ansible (TP 3) ; `Dockerfile`, `compose.yaml`, `monitoring/`, `charge.sh` : TP 4.
-- `RENDU.md` : vos réponses (TP 1 et TP 4).
+- `CHANGELOG.md` : les versions livrées (TP 2).
 
 Bloqué 5 minutes : ouvrez le bloc **Indice** ; 5 minutes de plus : le bloc **Solution**. Une erreur : [Erreurs fréquentes](#erreurs-fréquentes).
 
@@ -31,7 +31,7 @@ git switch main && git pull       # revenir sur main à jour
 
 ## TP 0 — Votre pizzeria en ligne
 
-### 1. Ouvrir le codespace, lancer l'API, ouvrir le port 8000.
+### 1. Votre page de la pizzeria est ouverte (slide « On fait ensemble : GitHub et votre codespace »).
 
 ```bash
 uvicorn app.main:app --reload
@@ -100,72 +100,9 @@ git push
 Postez le lien de votre dépôt dans le chat.
 </details>
 
-## TP 1 — Étude de cas : diagnostic et rôles
+## TP 2 — Du commit à la release
 
-En binôme, dans `RENDU.md` (partie TP 1) du dépôt de l'un des deux. Données : en tête de `RENDU.md`.
-Remplacez seulement les `___`. Livrable : un commit de `RENDU.md`.
-
-### 1. Compléter les calculs des 4 métriques (données en tête de `RENDU.md`).
-
-**Vous devez voir** : 4 valeurs chiffrées.
-
-<details><summary>Indice</summary>
-
-Écrivez le calcul, pas seulement le résultat. Lead time : du jour du commit au jour du déploiement. Change fail rate : déploiements en échec / déploiements.
-</details>
-
-<details><summary>Solution</summary>
-
-12 déploiements sur 1 mois, 12 par mois ; (10 + 8 + 3) / 3 = 7 jours ; 3 / 12 = 25 % ; (1 + 2 + 6) / 3 = 3 h.
-</details>
-
-### 2. Relier la friction de l'entretien à un enjeu métier.
-
-**Vous devez voir** : 1 ligne complète.
-
-<details><summary>Indice</summary>
-
-Pour chaque citation : qu'est-ce que l'entreprise perd ? Du temps (délai), de l'argent (coût), la confiance des clients (image).
-</details>
-
-<details><summary>Solution</summary>
-
-Karim : délai (ou coût).
-</details>
-
-### 3. Un seul rôle responsable par tâche (liste dans RENDU.md).
-
-**Vous devez voir** : 8 responsables.
-
-<details><summary>Indice</summary>
-
-SysOps : serveurs, réseau, sauvegardes. DevOps : le chemin du code à la production. DevSecOps : la sécurité dans ce chemin.
-</details>
-
-<details><summary>Solution</summary>
-
-1 DevOps, 2 SysOps, 3 DevSecOps, 4 DevOps, 5 SysOps, 6 SysOps, 7 DevSecOps, 8 DevSecOps. Toute réponse argumentée avec un seul responsable est acceptée.
-</details>
-
-### 4. Un contrôle de sécurité et son moment dans le cycle.
-
-**Vous devez voir** : 1 ligne complète.
-
-<details><summary>Indice</summary>
-
-Le plus tôt possible dans le cycle, là où une correction coûte le moins cher (shift left).
-</details>
-
-<details><summary>Solution</summary>
-
-| Contrôle | Moment du cycle |
-|---|---|
-| analyse des dépendances (pip-audit) | à chaque pull request |
-</details>
-
-## TP 2 — Votre pipeline protège main
-
-### 1. Recopier ci.yml du README sur une branche, pull request, fusion.
+### 1. Recopier ci.yml et la ligne du badge (README) sur une branche, pull request, fusion.
 
 Fichier `.github/workflows/ci.yml` :
 
@@ -187,51 +124,32 @@ jobs:
       - run: pytest
 ```
 
-**Vous devez voir** : la pastille verte.
+Ligne du badge, à coller sous le titre de ce `README.md` (remplacez `<votre-compte>` par votre compte GitHub) :
+
+```markdown
+![ci](https://github.com/<votre-compte>/nova-demo/actions/workflows/ci.yml/badge.svg)
+```
+
+**Vous devez voir** : la pastille verte, puis le badge vert.
 
 <details><summary>Indice</summary>
 
-Créez la branche avec le nom de branche en bas à gauche de l'éditeur (**Create new branch**). Après le push, GitHub propose **Compare & pull request**.
+Créez la branche avec le nom de branche en bas à gauche de l'éditeur (**Create new branch**). Après le push, GitHub propose **Compare & pull request**. Le badge affiche l'état du pipeline sur `main` : il passe au vert après la fusion.
 </details>
 
 <details><summary>Solution</summary>
 
 ```bash
 git switch -c ajout-ci
-mkdir -p .github/workflows       # puis créer ci.yml dans ce dossier, avec le contenu ci-dessus
-git add .github/workflows/ci.yml
-git commit -m "TP 2 : pipeline d'intégration continue"
+mkdir -p .github/workflows       # puis créer ci.yml dans ce dossier, et coller la ligne du badge dans README.md
+git add .github/workflows/ci.yml README.md
+git commit -m "TP 2 : pipeline d'intégration continue et badge"
 git push -u origin ajout-ci
 ```
 Sur GitHub : **Compare & pull request → Create pull request**, attendre la pastille verte, **Merge pull request**. Puis `git switch main && git pull`.
 </details>
 
-### 2. Ajouter le badge d'état au README.
-
-Ligne à coller en haut du `README.md` (remplacez `<votre-compte>` par votre compte GitHub) :
-
-```markdown
-![ci](https://github.com/<votre-compte>/nova-demo/actions/workflows/ci.yml/badge.svg)
-```
-
-**Vous devez voir** : le badge vert sur la page du dépôt.
-
-<details><summary>Indice</summary>
-
-Le badge affiche l'état du pipeline sur `main`. Commit et push, puis rechargez la page du dépôt.
-</details>
-
-<details><summary>Solution</summary>
-
-Collez la ligne sous le titre, enregistrez, puis :
-
-```bash
-git commit -am "TP 2 : badge d'état"
-git push
-```
-</details>
-
-### 3. Ruleset (slide « Protéger main avec un ruleset »), changer un prix, pull request.
+### 2. Ruleset (slide « Protéger main avec un ruleset »), changer un prix, pull request.
 
 **Vous devez voir** : la fusion bloquée. Remettre le prix.
 
@@ -253,6 +171,64 @@ git push
 3. Remettre `9`, puis `git commit -am "Prix remis" && git push` : pastille verte, fusion.
 </details>
 
+### 3. Sur une branche : livraison.yml à trous (README) et CHANGELOG.md v1.0.0 ; pull request, fusion ; puis tag v1.0.0.
+
+1. Sur une nouvelle branche, dans `CHANGELOG.md`, ajoutez au-dessus de v0.1.0 une section v1.0.0 qui résume les TP 0 à 2 (même format que v0.1.0).
+2. Créez `.github/workflows/livraison.yml` à partir de ce modèle et remplacez A, B, C et D.
+   ```yaml
+   name: livraison
+   on: {push: {___A___: ["v*"]}}
+   permissions:
+     contents: ___B___
+   jobs:
+     release:
+       runs-on: ___C___
+       steps:
+         - uses: actions/checkout@v7
+           with: {persist-credentials: false}
+         - uses: actions/setup-python@v7
+           with: {python-version: "3.12"}
+         - run: pip install -r requirements.txt
+         - run: pytest
+         - run: gh release create "$GITHUB_REF_NAME" -F CHANGELOG.md
+           env:
+             ___D___: ${{ secrets.GITHUB_TOKEN }}
+   ```
+3. Pull request, fusion (main est protégée), puis :
+   ```
+   git switch main
+   git pull
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+   **Vous devez voir** : la release v1.0.0 dans l'onglet Releases, avec le texte de votre CHANGELOG.
+
+<details><summary>Indice</summary>
+
+A : quand se déclenche le workflow ? B : la release écrit dans le dépôt. C : la même machine que ci.yml. D : la variable d'environnement que lit gh.
+</details>
+
+<details><summary>Solution</summary>
+
+A `tags`, B `write`, C `ubuntu-latest`, D `GH_TOKEN`. Section du CHANGELOG, par exemple :
+
+```markdown
+## v1.0.0 — 2026-11-18
+### Ajouté
+- Nom de la pizzeria sur la page de commande
+- Pipeline d'intégration continue (ci.yml) et badge d'état
+- Protection de main par un ruleset
+- Livraison sur tag (livraison.yml)
+```
+```bash
+git switch -c livraison
+git add CHANGELOG.md .github/workflows/livraison.yml
+git commit -m "TP 2 : livraison v1.0.0"
+git push -u origin livraison
+```
+Puis la pull request, la fusion et les 4 commandes du point 3. Onglet **Actions** : le workflow `livraison` tourne, puis la release apparaît.
+</details>
+
 ## TP 3 — L'infrastructure de Nova en code
 
 Dans `infra/` : `main.tf` (Terraform), `inventaire.yaml` et `site.yaml` (Ansible). Livrable : un commit de `infra/inventaire.yaml`.
@@ -262,14 +238,15 @@ Dans `infra/` : `main.tf` (Terraform), `inventaire.yaml` et `site.yaml` (Ansible
 ```bash
 cd infra
 terraform init
-terraform apply      # affiche le plan, puis répondez yes
+terraform plan
+terraform apply      # répondez yes
 ```
 
 **Vous devez voir** : deux pages, ports 8081 et 8082.
 
 <details><summary>Indice</summary>
 
-Lisez le plan avant de répondre `yes` : chaque `+` est une ressource créée. Les pages s'ouvrent dans l'onglet **Ports**, ou avec `curl localhost:8081`.
+Lisez le plan avant l'apply : chaque `+` est une ressource créée. Les pages s'ouvrent dans l'onglet **Ports**, ou avec `curl localhost:8081`.
 </details>
 
 <details><summary>Solution</summary>
@@ -401,7 +378,7 @@ Dans `app/main.py`, changez par exemple `PIZZERIA` ou la phrase « Commande en l
 
 ## TP 4 — Observer Nova, provoquer une panne
 
-Livrables : un commit pour l'instrumentation et `RENDU.md`, un commit pour le test des quantités.
+Livrables : un commit pour l'instrumentation, un commit pour le test des quantités. La latence et l'hypothèse se votent sur l'outil de sondage.
 
 ### 1. Décommenter l'instrumentation, up -d --build, Grafana, ./charge.sh puis ./charge.sh rush.
 
@@ -426,18 +403,22 @@ Instrumentator().instrument(app, latency_lowr_buckets=(0.005, 0.01, 0.025, 0.05,
 `curl -s localhost:8000/metrics | head` affiche des mesures. Sous `./charge.sh`, environ 5 requêtes par seconde ; sous `./charge.sh rush`, le trafic et la latence montent pendant 60 s.
 </details>
 
-### 2. Partie SLO (Service Level Objective) de RENDU.md.
+### 2. Lire la latence au 95e centile au pic de ./charge.sh rush.
 
-**Vous devez voir** : indicateur, cible, error budget.
+```bash
+./charge.sh rush
+```
+
+**Vous devez voir** : la valeur ; votez-la : sous les 500 ms ou non (slide « SLI, SLO et error budget »).
 
 <details><summary>Indice</summary>
 
-Error budget = 100 % moins la cible, appliqué aux 43 200 minutes de 30 jours.
+Panneau « Latence 95e centile /commandes », pendant les 60 s du rush : survolez le point le plus haut de la courbe.
 </details>
 
 <details><summary>Solution</summary>
 
-Panneau « Latence 95e centile /commandes » ; SLI sous 500 ms pendant 99,5 % du temps ; 0,5 % de 43 200 min = 216 min au-dessus de 500 ms ; budget épuisé : on fige les nouveautés et on fiabilise.
+La valeur dépend du codespace (environ 0,5 s mesuré en 2 cœurs). Sous 500 ms : le SLO est tenu au pic ; au-dessus : il ne l'est pas. Votez sur l'outil de sondage.
 </details>
 
 ### 3. Compléter et renommer le test à trous (README), limite à 6.
@@ -461,7 +442,7 @@ Une quantité refusée est hors de 1 à 4 pizzas. Code HTTP d'une donnée refus�
 Trous : `verifier_quantite(5)`, `"quantite": 5`, `== 422`. `pytest` : vert. Avec `QUANTITE_MAX = 6`, 5 devient acceptée : `2 failed`. Remettez `QUANTITE_MAX = 4` : vert.
 </details>
 
-### 4. Partie chaos de RENDU.md, docker compose stop api 2 minutes, puis start.
+### 4. Votez votre hypothèse : en combien de temps « API joignable » passe à 0 ? Puis docker compose stop api 2 minutes, et start.
 
 ```bash
 docker compose stop api      # attendre 2 minutes
@@ -472,17 +453,13 @@ docker compose start api
 
 <details><summary>Indice</summary>
 
-Remplissez « Avant l'expérience » avant d'arrêter quoi que ce soit. Gardez `./charge.sh` dans un autre terminal et le tableau de bord ouvert.
+Votez sur l'outil de sondage avant d'arrêter quoi que ce soit. Gardez `./charge.sh` dans un autre terminal et le tableau de bord ouvert.
 </details>
 
 <details><summary>Solution</summary>
 
 `./charge.sh` affiche `000` (pas de réponse) ; « API joignable » passe à 0 en une dizaine de secondes ; les panneaux de trafic et de latence montrent un trou. Après `start` : « API joignable » revient à 1, `200` revient.
 </details>
-
-## TP 5 — Atelier collectif : préparer la migration de Nova
-
-En classe, sans dépôt : une stratégie 7 R par composant, le service cloud de l'API, un risque et sa mesure.
 
 ## En avance ?
 
@@ -502,5 +479,6 @@ Copiez le message exact avant de demander de l'aide.
 | Cible Prometheus en erreur (`no such host`), « API joignable » à 0 | Le service `api` est encore en commentaire dans `compose.yaml` (TP 4, partie 1). |
 | Panneaux de requêtes et de latence vides pendant l'arrêt de l'API | Normal : une API arrêtée n'envoie plus de mesures. Seul « API joignable » (et `charge.sh`) voit la panne. |
 | `port is already allocated` sur le port 8000 | Un conteneur ou uvicorn tourne encore : Ctrl+C, ou `docker ps` puis `docker stop`. |
+| Aucune release après `git push origin v1.0.0` | Tag poussé avant la fusion de `livraison.yml` : `git push origin :v1.0.0` et `git tag -d v1.0.0`, puis recommencer après la fusion. |
 | `timeout while waiting for state to become 'removed'` | Une ressource remplacée (`-/+` dans le plan) est encore utilisée par une autre. |
 | `env: 'bash\r': No such file or directory` ou `detected dubious ownership` | Vous travaillez hors de Codespaces : repassez sur votre codespace. |
