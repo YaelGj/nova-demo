@@ -104,17 +104,21 @@ Supprimer le ruleset (**Settings → Rules → Rulesets → proteger-main → De
 
 ```bash
 gh release delete v1.0.0 --cleanup-tag --yes      # supprime la release et le tag, distant et local
-git switch main && git pull
-git restore --source=<commit noté la veille> --staged --worktree .
-git commit -m "Retour à l'état avant" && git push
+git switch main
+git push --force origin <commit noté la veille>:main   # main revient à l'état « avant », sans les fusions
+git reset --hard <commit noté la veille>
 ```
 
-Les branches `demo-*` sont intactes : la démonstration 2 se rejoue telle quelle.
+Les branches `demo-*` n'ont pas bougé : la démonstration 2 se rejoue telle quelle, avec de nouvelles pull requests. Sans le `--force`, GitHub refuserait ces pull requests (« No commits between main and demo-1-ci »).
 
 ## Répéter sur une copie (nova-repetition)
 
-1. nova-demo, **Settings → General → Template repository** : cocher.
-2. **Use this template → Create a new repository** : `nova-repetition`, public, **Include all branches** coché (branches `demo-*`).
-3. Décocher **Template repository** sur nova-demo.
-4. Démonstrations 1 à 6 sur nova-repetition (le badge de `demo-2-badge` affiche l'état de nova-demo : sans importance).
-5. Rejouer : la section précédente ; ou supprimer nova-repetition (**Settings → Delete this repository**) et recommencer.
+1. Dans un terminal de votre machine où `gh` est connecté (le jeton d'un codespace ne crée pas de dépôt) :
+   ```bash
+   gh repo create YaelGj/nova-repetition --public
+   git clone --bare https://github.com/YaelGj/nova-demo.git nova.git
+   git -C nova.git push --all https://github.com/YaelGj/nova-repetition.git
+   ```
+   Pas de « Use this template » : les branches y perdent leur historique commun avec `main`, et GitHub refuse les pull requests des branches `demo-*`.
+2. Démonstrations 1 à 6 sur nova-repetition (le badge de `demo-2-badge` affiche l'état de nova-demo : sans importance).
+3. Rejouer : la section précédente ; ou supprimer nova-repetition (**Settings → Delete this repository**) et recommencer.
