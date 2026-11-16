@@ -93,6 +93,41 @@ Une seule modification : dans `infra/main.tf`, variable `nombre_vm`, `default = 
 terraform apply                  # lire le plan : Plan: 1 to add ; yes ; troisième page sur le port 8083
 ```
 
+## Démonstration Kubernetes (slide 40), en local avec Docker Desktop
+
+Sur votre poste, pas dans le codespace ; les élèves regardent. Commandes dans **PowerShell**, à la racine du clone. Fichier : `k8s/deploiement.yaml`.
+
+**La veille**
+
+1. Docker Desktop : vue **Kubernetes** → **Create cluster** → mode **kubeadm** → **Create** ; attendre l'état « running ».
+2. Terminal :
+   ```powershell
+   git clone https://github.com/YaelGj/nova-demo.git
+   cd nova-demo
+   kubectl config use-context docker-desktop
+   kubectl get nodes                          # docker-desktop   Ready
+   docker build -t nova-api:demo .
+   kubectl apply -f k8s/deploiement.yaml
+   kubectl rollout status deployment/nova-api # successfully rolled out
+   kubectl get pods                           # 2 pods nova-api-…, READY 1/1, Running
+   ```
+
+**En direct**
+
+1. `kubectl get pods` — « Deux copies de l'API Nova tournent : c'est le Deployment qui en demande 2. »
+2. `kubectl delete pod <nom d'un des deux pods>` — « Je tue une copie, comme une panne de machine. »
+3. `kubectl get pods -w` (Ctrl+C pour sortir) — « Personne ne relance rien : Kubernetes voit 1 au lieu de 2 et recrée un pod, nouveau nom, Running. »
+
+Le remplacement prend 2 à 3 s (`READY 1/1`) : à l'étape 3, il est déjà fait, montrer le nouveau nom et son `AGE` de quelques secondes. Pour le voir passer (`Pending`, `ContainerCreating`, `Running`), lancer `kubectl get pods -w` dans une seconde fenêtre PowerShell avant l'étape 2.
+
+**Après la séance**
+
+```powershell
+kubectl delete -f k8s/deploiement.yaml
+```
+
+Puis Docker Desktop : vue **Kubernetes** → **Stop** : les conteneurs du cluster sont supprimés, la mémoire est libérée.
+
 ## Après la séance : revenir à l'état « avant » et rejouer
 
 ```bash

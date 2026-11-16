@@ -1,0 +1,29 @@
+# Démonstration slide 40 : 2 copies de l'API Nova, Kubernetes en garde toujours 2.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nova-api
+spec:
+  replicas: 2                      # nombre de pods voulu
+  selector:
+    matchLabels: {app: nova-api}
+  template:                        # modèle de chaque pod
+    metadata:
+      labels: {app: nova-api}
+    spec:
+      containers:
+        - name: api
+          image: nova-api:demo     # construite en local : docker build -t nova-api:demo .
+          imagePullPolicy: Never   # image locale, jamais téléchargée
+          ports: [{containerPort: 8000}]
+          readinessProbe:          # pod prêt quand /health répond
+            httpGet: {path: /health, port: 8000}
+---
+# Une adresse stable devant les 2 pods.
+apiVersion: v1
+kind: Service
+metadata:
+  name: nova-api
+spec:
+  selector: {app: nova-api}
+  ports: [{port: 8000}]
